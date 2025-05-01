@@ -1,90 +1,87 @@
-import { useState, useEffect } from "react";
-import { connectWallet, getBurnJackpotContract } from "./web3";
-import { ethers } from "ethers";
+import React, { useState, useEffect } from 'react';
+import Header from './components/Header.jsx';
+import WalletConnect from './components/WalletConnect.jsx';
+import JackpotState from './components/JackpotState.jsx';
+import BurnNFT from './components/BurnNFT.jsx';
+import FounderActions from './components/FounderActions.jsx';
+import { loadContractState } from './components/web3.js';
+import './App.css';
 
-function App() {
-  const [signer, setSigner] = useState(null);
-  const [nftAddress, setNftAddress] = useState("");
-  const [tokenId, setTokenId] = useState("");
-  const [burnPrice, setBurnPrice] = useState("0.00");
-  const [txHash, setTxHash] = useState("");
+const App = () => {
+  const [account, setAccount] = useState(null);
+  const [contract, setContract] = useState(null);
+  const [jackpotPool, setJackpotPool] = useState("0");
+  const [totalParticipants, setTotalParticipants] = useState("0");
+  const [isActive, setIsActive] = useState(false);
+  const [winner, setWinner] = useState("0x0");
+  const [burnFee, setBurnFee] = useState("0");
+  const [founder, setFounder] = useState("0x0");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    (async () => {
-      const provider = connectWallet().catch(() => null);
-      if (provider) {
-        setSigner(provider);
-        const contract = getBurnJackpotContract(provider);
-        const price = await contract.burnPrice();
-        setBurnPrice(ethers.utils.formatEther(price));
-      }
-    })();
-  }, []);
-
-  const handleBurn = async () => {
-    if (!signer) return alert("Connecte ton wallet d'abord");
-    const contract = getBurnJackpotContract(signer);
-    const tx = await contract.burnNFT(nftAddress, tokenId, {
-      value: ethers.utils.parseEther(burnPrice),
-    });
-    setTxHash(tx.hash);
-    await tx.wait();
-    alert("NFT brûlé ! Tx hash : " + tx.hash);
-  };
+    loadContractState(
+      contract,
+      setJackpotPool,
+      setTotalParticipants,
+      setIsActive,
+      setWinner,
+      setBurnFee,
+      setFounder,
+      setError
+    );
+  }, [contract]);
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Burn & Jackpot</h1>
-      <button
-        onClick={async () => setSigner(await connectWallet())}
-        className="px-4 py-2 bg-blue-600 text-white rounded"
-      >
-        {signer ? "Wallet connecté" : "Connecter mon wallet"}
-      </button>
-
-      <div>
-        <label>Adresse du contrat NFT</label>
-        <input
-          type="text"
-          value={nftAddress}
-          onChange={e => setNftAddress(e.target.value)}
-          className="w-full border p-2 rounded"
+    <div className="min-h-screen">
+      <Header />
+      <div className="container mx-auto p-6">
+        <WalletConnect
+          account={account}
+          setAccount={setAccount}
+          setContract={setContract}
+          setError={setError}
         />
-      </div>
-      <div>
-        <label>Token ID</label>
-        <input
-          type="number"
-          value={tokenId}
-          onChange={e => setTokenId(e.target.value)}
-          className="w-full border p-2 rounded"
+        <JackpotState
+          jackpotPool={jackpotPool}
+          totalParticipants={totalParticipants}
+          isActive={isActive}
+          winner={winner}
+          burnFee={burnFee}
+          founder={founder}
         />
+        <BurnNFT
+          contract={contract}
+          account={account}
+          setError={setError}
+          setSuccess={setSuccess}
+          setJackpotPool={setJackpotPool}
+          setTotalParticipants={setTotalParticipants}
+        />
+        <FounderActions
+          contract={contract}
+          account={account}
+          founder={founder}
+          setError={setError}
+          setSuccess={setSuccess}
+          setJackpotPool={setJackpotPool}
+          setTotalParticipants={setTotalParticipants}
+          setIsActive={setIsActive}
+          setWinner={setWinner}
+        />
+        {error && (
+          <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-center">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg text-center">
+            {success}
+          </div>
+        )}
       </div>
-      <div>
-        <p>Prix de brûlure : {burnPrice} ETH</p>
-      </div>
-      <button
-        onClick={handleBurn}
-        className="w-full px-4 py-2 bg-red-600 text-white rounded mt-2"
-      >
-        Brûler le NFT
-      </button>
-
-      {txHash && (
-        <p className="mt-4">
-          Tx hash :{" "}
-          <a
-            href={`https://explorer.berachain.com/tx/${txHash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline"
-          >
-            {txHash}
-          </a>
-        </p>
-      )}
     </div>
   );
-}
+};
 
 export default App;

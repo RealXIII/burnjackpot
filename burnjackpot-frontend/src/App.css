@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  margin: 0;
+  padding: 0;
+}
+
+/* Style pour les cartes */
+.card {
+  @apply bg-white rounded-xl shadow-lg p-6 border border-gray-200 transition-all duration-300 hover:shadow-xl;
+}
+
+/* Style pour les titres de section */
+.section-title {
+  @apply text-2xl font-bold mb-4 text-dark flex items-center;
+}
+
+/* Style pour les étiquettes */
+.label {
+  @apply block mb-2 text-sm font-medium text-dark;
+}
+
+/* Style pour les champs de saisie */
+.input {
+  @apply w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200;
+}
+
+/* Style pour les boutons */
+.btn {
+  @apply px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all duration-300;
+}
+
+/* Bouton principal */
+.btn-primary {
+  @apply btn bg-primary hover:bg-secondary;
+}
+
+/* Bouton vert (Burn NFT) */
+.btn-green {
+  @apply btn bg-green-500 hover:bg-green-600;
+}
+
+/* Bouton danger (Founder Actions) */
+.btn-danger {
+  @apply btn bg-red-500 hover:bg-red-600;
+}
